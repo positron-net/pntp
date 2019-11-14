@@ -1,7 +1,7 @@
 {
-  "name": "ion",
-  "version": "1.0.0",
-  "description": "",
+  "name": "pntp",
+  "version": "0.1.5",
+  "description": "Positron Network Transportation Protocol",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
