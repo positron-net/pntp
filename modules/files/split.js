@@ -1,4 +1,4 @@
-const compress = require('./compress.js')
+const { compress } = require('./compressor')
 
 module.exports = async (data, peers, callback) => {
   let i = 0

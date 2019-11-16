@@ -1,4 +1,4 @@
-const decompress = require('./decompress.js')
+const { decompress } = require('./compressor')
 
 module.exports = async (buffers, callback) => {
   let file = []

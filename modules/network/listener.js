@@ -1,15 +1,18 @@
 const utp = require('./utp')
-const coder = require('./coder')
+const { decode } = require('./coder')
 
-module.exports = (port, ondata) => {
+module.exports = (port, ondata, password) => {
   const listener = utp.createServer(socket => {
     console.log(`[LISTENER] > new connection from [${socket.host}:${socket.port}]`)
     socket.on('data', data => {
-      coder.decode(data)
-      .then(result => ondata(result))
-      .catch(err => {
-        console.log(err)
+      data = JSON.parse(data)
+
+      decode(data.content, password)
+      .then(decodedContent => {
+        data.content = decodedContent
+        ondata(data)
       })
+      .catch(err => console.log(err))
     })
   })
 

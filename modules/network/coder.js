@@ -1,25 +1,56 @@
-const snappy = require('snappy')
+const { compress, decompress } = require('../files/compressor')
+const { encrypt, decrypt } = require('../security/aes')
 
 module.exports = {
-  encode (message) {
+  encode (content, password) {
     return new Promise((resolve, reject) => {
-      message = JSON.stringify(message)
-      snappy.compress(message, (err, compressed) => {
-        if (err) reject(err)
-        resolve(compressed)
+      // compress it
+      compress(content)
+      .then(compressedContent => {
+        content = compressedContent // update the content in the object
+        // if a password is given
+        if (password) {
+          // encrypt the content of the message
+          encrypt(content, password)
+          .then(encryptedContent => {
+            content = encryptedContent // update the content in the object
+            resolve(JSON.stringify(content)) // send the request
+          })
+          .catch(err => console.log(err)) // if an error happen, retun it
+        } else {
+          resolve(JSON.stringify(content)) // send the request
+        }
       })
+      .catch(err => console.log(err)) // if an error happen, retun it
     })
   },
 
-  decode (buffer) {
+  decode (content, password) {
     return new Promise((resolve, reject) => {
-      snappy.uncompress(buffer, (err, original) => {
-        if (err) reject(err)
-
-        original = JSON.parse(original.toString())
-
-        resolve(original)
-      })
+      content = Buffer.from(JSON.parse(content))
+        // if a password is given
+        if (password) {
+          // decrypt the content of the message
+          decrypt(content, password)
+          .then(decryptedContent => {
+            console.log(decryptedContent)
+            // decompress it
+            decompress(decryptedContent)
+            .then(decompressedContent => {
+              content = Buffer.from(decompressedContent).toString()
+              resolve(content) // return it
+            })
+            .catch(err => console.log(err))
+          })
+          .catch(err => console.log(err)) // if an error happen, retun it
+        } else {
+          decompress(content)
+          .then(decompressedContent => {
+            content = Buffer.from(decompressedContent).toString()
+            resolve(content)
+          })
+          .catch(err => console.log(err))
+        }
     })
   }
 }

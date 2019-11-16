@@ -1,24 +1,28 @@
-const utp = require('./utp')
-const coder = require('./coder')
+const utp = require('./utp') // utp lib
+const { encode } = require('./coder')
 
-module.exports = (address, port, action, content) => {
+module.exports = (address, port, action, content, password) => {
   return new Promise((resolve, reject) => {
+    const sender = utp.connect(port, address) // connect to the peer
 
-    const sender = utp.connect(port, address)
+    // create message
     const message = {
       action: action,
       content: content
     }
-  
-    coder.encode(message)
-    .then(result => {
-      sender.write(result)
+
+    // encode content
+    encode(message.content, password)
+    .then(encodedContent => {
+      message.content = encodedContent // update content
+      sender.write(JSON.stringify(message)) // send data
+
+      // return peer' address and port
       resolve({
         ip: address,
         port: port
       })
     })
     .catch(err => reject(err))
-
   })
 }
